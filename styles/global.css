@@ -1,0 +1,82 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* https://tailwindcss.com/docs/functions-and-directives#layer */
+@layer components {
+  .sidebar-icon {
+    @apply relative flex items-center justify-center 
+      h-[48px] w-[48px] my-2 mx-auto shadow-lg
+       text-white
+      hover:bg-[#3b3c3f] hover:text-white
+      rounded-3xl hover:rounded-xl
+      transition-all duration-300 ease-linear
+      shrink-0
+      cursor-pointer
+      ;
+  }
+
+  .sidebar-tooltip {
+    @apply 
+      left-14 z-50
+      absolute w-auto p-2 m-2 min-w-max 
+      rounded-md shadow-md
+      text-white bg-black
+      text-xs font-bold
+      transition-all duration-100 scale-0 origin-left;
+  }
+
+  .sidebar-active {
+    @apply bg-[#3b3c3f] hover:text-white rounded-xl
+  }
+
+  .friend-active {
+    @apply bg-black
+  }
+
+}
+@layer utilities {
+  /* Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  input:focus {
+    outline: none;
+  }
+
+  div:focus {
+    outline: none;
+  }
+
+  /* 聊天框ScrollBar */
+  /* custom scroll bar */
+  .scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .scrollbar::-webkit-scrollbar-track {
+    border-radius: 100vh;
+  }
+
+  .scrollbar::-webkit-scrollbar-thumb {
+    background: #36383e;
+    border-radius: 100vh;
+  }
+
+  .scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #3c3e45;
+  }
+
+  /* 侧边栏ScrollBar */
+  .sideScrollbar::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
+  }
+
+  .sideScrollbar {
+    scrollbar-width: none;
+  }
+
+}
