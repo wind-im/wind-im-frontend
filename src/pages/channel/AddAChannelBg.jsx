@@ -5,7 +5,7 @@ import { useMutation, useQuery } from 'react-query'
 import { getWhoami } from '@/utils/apiUtils'
 import Router from 'next/router'
 
-async function createChannel ({ name, desc }) {
+async function createChannel({ name, desc }) {
   const result = await axios.post('/api/channel', {
     name,
     desc
@@ -15,14 +15,14 @@ async function createChannel ({ name, desc }) {
 
 // join a channel
 // todo 为了不暴露channelId主键，改成根据邀请码InviteId加入
-async function joinChannel ({ channelId }) {
+async function joinChannel({ channelId }) {
   const result = await axios.post('/api/channel/join', {
     channelId
   })
   return result.data
 }
 
-export default function AddChannelBg ({ id, onClickCloseAddAServer, setAddServerFlag }) {
+export default function AddChannelDialog({ id, onClickCloseAddAServer, setAddServerFlag }) {
   const [nextPageFlag, setNextPageFlag] = useState(false)
   const createMyOwnElementId = 'createMyOwnElement'
   const joinAServerElementId = 'joinAServerElement'
@@ -45,13 +45,13 @@ export default function AddChannelBg ({ id, onClickCloseAddAServer, setAddServer
     setNextPageFlag(false)
   }
 
-  function CreateMyOwn () {
+  function CreateMyOwn() {
     const { data, error, isLoading } = useQuery('whoami', getWhoami)
     const createChannelMut = useMutation(createChannel)
     const [channelName, setChannelName] = useState('')
-    const avatarName = channelName + data?.data?.username
+    const avatarName = channelName
 
-    function onClickCreate () {
+    function onClickCreate() {
       if (isChannelNameValid(channelName)) {
         createChannelMut.mutate({ name: channelName, desc: '' })
       } else {
@@ -64,7 +64,8 @@ export default function AddChannelBg ({ id, onClickCloseAddAServer, setAddServer
       const channelId = createChannelMut.data.data?.channelId
       if (channelId) {
         setAddServerFlag(false)
-        Router.push('/channel/' + channelId)
+        window.location.replace('/channel/' + channelId)
+        // Router.push('/channel/' + channelId)
       }
     }
 
@@ -92,11 +93,11 @@ export default function AddChannelBg ({ id, onClickCloseAddAServer, setAddServer
     )
   }
 
-  function JoinChannel () {
+  function JoinChannel() {
     const $channelId = useRef('')
     const joinChannelMut = useMutation(joinChannel)
 
-    function onClickJoin () {
+    function onClickJoin() {
       console.log('onClickJoin, channelId:' + $channelId.current.value)
       joinChannelMut.mutate({ channelId: $channelId.current.value })
     }
@@ -144,15 +145,15 @@ export default function AddChannelBg ({ id, onClickCloseAddAServer, setAddServer
           </div>
           {/* second page */}
           {/* create my own Or join a server */}
-          { currentHit === createMyOwnElementId && <CreateMyOwn />}
-          { currentHit === joinAServerElementId && <JoinChannel />}
+          {currentHit === createMyOwnElementId && <CreateMyOwn />}
+          {currentHit === joinAServerElementId && <JoinChannel />}
         </div>
       </div>
     </div>
   )
 }
 
-function isChannelNameValid (channelName) {
+function isChannelNameValid(channelName) {
   if (!channelName || channelName.trim().length === 0) {
     return false
   }

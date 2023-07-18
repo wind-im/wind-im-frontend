@@ -20,7 +20,7 @@ export default function SignUpForm () {
   // prisma.user.findMany()
   const createAccountMutation = useMutation(createAccount, {
     onSuccess () {
-      alert('created!')
+      alert('Account Created!')
     }
   })
 
