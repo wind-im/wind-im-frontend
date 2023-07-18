@@ -50,7 +50,7 @@ export default function Sidebar() {
                 {/* Main Functions */}
                 <SidebarIcon linkTo='/' text='Home' icon={<AiOutlineHome size="28" />} tabState={tabState} />
                 <div className='shrink-0 w-[40px] h-[1px] bg-[#2f2f30] mx-4 my-2'></div>
-                <ChannelIconList/>
+                <ChannelIconList />
                 <AddChannelIcon />
                 {/* <SidebarIcon linkTo='/explore' text='Explore' icon={<AiOutlineCompass size="28"/>} tabState ={tabState}/> */}
                 {/* <SidebarIcon linkTo='/user/profile' text='Profile' icon={<AiOutlineUser size="28"/>} tabState ={tabState}/> */}
@@ -66,7 +66,6 @@ export default function Sidebar() {
 
 function ChannelIconList() {
     const router = useRouter()
-    console.log("router.path:" + router.asPath)
     // channel list data
     const { data, error, isLoading } = useQuery('getChannelList', getChannelList)
     function isCurrActive(currLink) {
@@ -97,10 +96,13 @@ function ChannelIconList() {
     )
 }
 
-function SidebarIcon({ icon, text = 'tooltip 💡', linkTo = '/'}) {
+function SidebarIcon({ icon, text = 'tooltip 💡', linkTo = '/' }) {
     const router = useRouter()
     function isCurrActive(currLink) {
-        return router.asPath == currLink
+        if (currLink == '/') {
+            return currLink == router.asPath
+        }
+        return router.asPath.startsWith(currLink)
     }
 
     return (
