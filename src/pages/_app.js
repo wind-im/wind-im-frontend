@@ -10,8 +10,8 @@ export default function WindIM ({ Component, pageProps }) {
   // reference: per-page layouts(https://nextjs.org/docs/basic-features/layouts)
   const getLayout = Component.getLayout || ((page) => page)
 
-  // online hear beat, every 5 seconds
-  useOnlineHeartbeat(5)
+  // online heart beat, every 5 seconds
+  // useOnlineHeartbeat(5)
 
   return (
     <QueryClientProvider client={queryClient}>
