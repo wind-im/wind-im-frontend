@@ -76,7 +76,7 @@ function getLatestOffsetByKey(storageKey) {
   const msgArray = JSON.parse(currentMsgListStr)
   const latestMsg = msgArray.pop()
   if (latestMsg == null) {
-    return null
+    return 0
   }
   return parseInt(latestMsg.id)
 }

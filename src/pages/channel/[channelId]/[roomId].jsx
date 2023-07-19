@@ -178,8 +178,8 @@ function renderMsg (newMsg, setCurrMsgList) {
 function useWebSocket (roomId, setCurrMsgList) {
   useEffect(() => {
     const msgOffset = getLatestStoredRMOffset(roomId)
-    console.log('msgOffset:' + msgOffset)
-    if (roomId) {
+    // console.log('msgOffset:' + msgOffset)
+    if (roomId != null) {
       // fixme useEffect runs twice, socket connects twice
       socket = io(process.env.NEXT_PUBLIC_WS_HOST, {
         withCredentials: true, // send cookies
@@ -204,6 +204,7 @@ function useWebSocket (roomId, setCurrMsgList) {
       socket.on(roomMsgEvent, function (msg) {
         saveAndRenderMsg(msg, setCurrMsgList, roomId)
       })
+      // todo fix this
       socket.on(roomMsgInitEvent, function (msgList) {
         // get msg from cache
         const cachedMsg = getRMFromLocalStorage(roomId)
