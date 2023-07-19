@@ -5,7 +5,7 @@ import HomeLayout from '../HomeLayout'
 import EmojiPicker from 'emoji-picker-react'
 import { useQuery } from 'react-query'
 import Avatar from '@/components/Avatar'
-import { getPrivateMsgInfo, getWhoami } from '@/utils/apiUtils'
+import { getPrivateMsgByOffset, getPrivateMsgInfo, getWhoami } from '@/utils/apiUtils'
 import Layout from '@/pages/Layout'
 import { getDMfromLocalStorage, getLatestStoredDMOffset, storeDirectMsg } from '@/utils/msgUtils'
 
@@ -15,7 +15,7 @@ const defaultRetryTimes = 3
 
 let socket
 
-DirectMessage.getLayout = function getLayout (page) {
+DirectMessage.getLayout = function getLayout(page) {
   return (
     <Layout>
       <HomeLayout>{page}</HomeLayout>
@@ -23,20 +23,17 @@ DirectMessage.getLayout = function getLayout (page) {
   )
 }
 
-function buildPrivateMsgEvent (privateMsgId) {
+function buildPrivateMsgEvent(privateMsgId) {
   return 'privateMsgEvent_' + privateMsgId
 }
 
-function buildInitPrivateMsgEvent (privateMsgId) {
+function buildInitPrivateMsgEvent(privateMsgId) {
   return 'privateMsgInitEvent_' + privateMsgId
 }
 
 // component entry point
-export default function DirectMessage () {
+export default function DirectMessage() {
   const { isLoading, data, error } = useQuery('whoami', getWhoami)
-  if (error) {
-    console.error(error)
-  }
   const router = useRouter()
   const { privateMsgId } = router.query
   const privateMsgInfo = useQuery(['getPrivateMsgInfo', privateMsgId], () => getPrivateMsgInfo(privateMsgId))
@@ -44,6 +41,19 @@ export default function DirectMessage () {
   const $msgInput = useRef()
   useWs(privateMsgId, setCurrMsgList)
   const [loadEmojiKeyboard, setLoadEmojiKeyboard] = useState(false)
+  // msg part
+  const MAX_INTEGER = 2147483647
+  const [msgOffset, setMsgOffset] = useState(MAX_INTEGER)
+  const queryPrivateMsg = useQuery(['privateMsgByOffset', privateMsgId, msgOffset],
+    () => getPrivateMsgByOffset(privateMsgId, msgOffset))
+  if (privateMsgId && queryPrivateMsg && queryPrivateMsg.data != null) {
+    console.log("msgId:", privateMsgId, "offset:", msgOffset, "data by offset", JSON.stringify(queryPrivateMsg.data.data))
+    // setCurrMsgList(pre => {
+    //   return [queryPrivateMsg.data.data, ...pre]
+    // })
+    // todo fix infinite re-render
+    // setCurrMsgList([...queryPrivateMsg.data.data])
+  }
 
   // init effect
   useEffect(() => {
@@ -53,7 +63,7 @@ export default function DirectMessage () {
     setCurrMsgList([])
   }, [privateMsgId])
 
-  function onKeyDownMessaging (e) {
+  function onKeyDownMessaging(e) {
     if (e.nativeEvent.isComposing) {
       // handle chinese keyboard composing
       return
@@ -77,7 +87,7 @@ export default function DirectMessage () {
   }
 
   // At least once message arrival
-  function emitMessage (msg) {
+  function emitMessage(msg) {
     if (msg.ext?.retryTimes < 0) {
       console.log('Ran out of retry times.')
       return
@@ -100,13 +110,13 @@ export default function DirectMessage () {
     }
   }
 
-  function cleanInputMsg () {
+  function cleanInputMsg() {
     if ($msgInput.current) {
       $msgInput.current.value = ''
     }
   }
 
-  function onClickEmoji (emojiOjb) {
+  function onClickEmoji(emojiOjb) {
     $msgInput.current.value += emojiOjb.emoji
   }
 
@@ -121,20 +131,20 @@ export default function DirectMessage () {
         {/* <SingleMsg className='text-white' content={'test msg'} email={'unsetEmail'}/>
           <SingleMsg className='text-white' content={'test msg'} email={'unsetEmail'}/> */}
         {currMsgList.map((m, idx) => {
-          return <SingleMsg className='text-white' key={idx} content={m.content} username={m.senderUsername}/>
+          return <SingleMsg className='text-white' key={idx} content={m.content} username={m.senderUsername} />
         })}
       </div>
-      <div className='fixed right-20 bottom-32'>{ loadEmojiKeyboard && <EmojiPicker searchDisabled={true} theme='dark' emojiStyle='native' onEmojiClick={onClickEmoji}/> }
+      <div className='fixed right-20 bottom-32'>{loadEmojiKeyboard && <EmojiPicker searchDisabled={true} theme='dark' emojiStyle='native' onEmojiClick={onClickEmoji} />}
       </div>
       <div className='flex items-center'>
-        <input className='break-all h-14 w-full px-10 py-4 rounded-2xl text-white bg-[#36383e]' ref={$msgInput} onKeyDown={onKeyDownMessaging}/>
+        <input className='break-all h-14 w-full px-10 py-4 rounded-2xl text-white bg-[#36383e]' ref={$msgInput} onKeyDown={onKeyDownMessaging} />
         <button className='w-10 h-10' onClick={() => setLoadEmojiKeyboard(!loadEmojiKeyboard)}>😊</button>
       </div>
     </div>
   )
 }
 
-function SingleMsg ({ username, content }) {
+function SingleMsg({ username, content }) {
   return (
     <>
       <div className='flex mx-2 p-3 text-white rounded-lg hover:bg-[#323437] duration-300 ease-linear'>
@@ -150,7 +160,7 @@ function SingleMsg ({ username, content }) {
 }
 
 // render the msg panel
-function saveAndRenderMsg (newMsg, setCurrMsgList, privateMsgId) {
+function saveAndRenderMsg(newMsg, setCurrMsgList, privateMsgId) {
   if (newMsg == null || privateMsgId == null) {
     return
   }
@@ -160,7 +170,7 @@ function saveAndRenderMsg (newMsg, setCurrMsgList, privateMsgId) {
   renderMsg(newMsg, setCurrMsgList)
 }
 
-function renderMsg (newMsg, setCurrMsgList) {
+function renderMsg(newMsg, setCurrMsgList) {
   if (newMsg == null) {
     return
   }
@@ -180,7 +190,7 @@ function renderMsg (newMsg, setCurrMsgList) {
   }, 0)
 }
 
-function useWs (privateMsgId, setCurrMsgList) {
+function useWs(privateMsgId, setCurrMsgList) {
   useEffect(() => {
     const msgOffset = getLatestStoredDMOffset(privateMsgId)
     console.log('msg offset:' + msgOffset)
@@ -204,17 +214,17 @@ function useWs (privateMsgId, setCurrMsgList) {
 
       // on initiating & receiving private msg
       const privateMsgEvent = buildPrivateMsgEvent(privateMsgId)
-      const privateMsgInitEvent = buildInitPrivateMsgEvent(privateMsgId)
-      socket.on(privateMsgEvent, function (msg) {
+      // const privateMsgInitEvent = buildInitPrivateMsgEvent(privateMsgId)
+      socket.on(privateMsgEvent, function(msg) {
         saveAndRenderMsg(msg, setCurrMsgList, privateMsgId)
       })
-      socket.on(privateMsgInitEvent, function (msgList) {
-        // init msg from localStorage
-        const cachedMsg = getDMfromLocalStorage(privateMsgId)
-        renderMsg(cachedMsg, setCurrMsgList, privateMsgId)
-        // render the rest of missing messages
-        saveAndRenderMsg(msgList, setCurrMsgList, privateMsgId)
-      })
+      // socket.on(privateMsgInitEvent, function (msgList) {
+      //   // init msg from localStorage
+      //   const cachedMsg = getDMfromLocalStorage(privateMsgId)
+      //   renderMsg(cachedMsg, setCurrMsgList, privateMsgId)
+      //   // render the rest of missing messages
+      //   saveAndRenderMsg(msgList, setCurrMsgList, privateMsgId)
+      // })
     }
     return () => { socket?.disconnect() }
   }, [privateMsgId])
