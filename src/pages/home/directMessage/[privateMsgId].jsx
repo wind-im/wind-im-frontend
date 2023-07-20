@@ -57,13 +57,13 @@ export default function DirectMessage() {
     // initiate currMsgList
     setCurrMsgList([])
     scrollToEnd()
-    console.log("clean currMsg:", currMsgList)
+    return () => setCurrMsgList([])
   }, [privateMsgId])
 
   useEffect(() => {
     if (privateMsgId && queryPrivateMsg.data != null) {
-      console.log("msgId:", privateMsgId, "offset:", msgOffset,
-        "data by offset", JSON.stringify(queryPrivateMsg.data.data))
+      // console.log("msgId:", privateMsgId, "offset:", msgOffset,
+      //   "data by offset", JSON.stringify(queryPrivateMsg.data.data))
       const newMsgList = queryPrivateMsg.data.data
       if (newMsgList == null || newMsgList.length == 0) {
         setHasMore(false)
@@ -71,14 +71,14 @@ export default function DirectMessage() {
         // mark the msg offset
         // msgOffset.current = newMsgList[newMsgList.length - 1].id
         setHasMore(true)
-        renderMsg(newMsgList.reverse(), setCurrMsgList, msgOffset == -1)
+        const msgListReversed = [...newMsgList].reverse()
+        renderMsg(msgListReversed, setCurrMsgList, msgOffset == -1)
       }
     }
   }, [privateMsgId, msgOffset, queryPrivateMsg.data])
 
   // infinite scroll (reverse)
   const msgObserver = useRef()
-  let lastNode = null
   const lastPrivateMsgNodeRef = useCallback(node => {
     if (queryPrivateMsg.isLoading) {
       return
@@ -91,8 +91,7 @@ export default function DirectMessage() {
         // todo fix duplicate
         const currViewMsg = entries[0].target
         scrollToHeight(currViewMsg)
-        const nextOffset = node.getAttribute("msgid")
-        console.log("offset:", nextOffset)
+        const nextOffset = currViewMsg.getAttribute("msgid")
         setMsgOffset(nextOffset)
       }
     })
@@ -132,7 +131,7 @@ export default function DirectMessage() {
     }
     if (socket && socket.connected) {
       const privateMsgEvent = buildPrivateMsgEvent(privateMsgId)
-      // todo guarantee the msg won't miss, we need to impl ack mechanism with https://socket.io/docs/v4/emitting-events/#acknowledgements
+      // guaranteeing msg won't miss with ack mechanism
       socket.timeout(2000).emit(privateMsgEvent, msg, (err, resp) => {
         if (err) {
           // retry sending msg, cuz the other side did not acknowledge the event in the given delay
@@ -168,7 +167,7 @@ export default function DirectMessage() {
       <div id="msgScroll" className=' overflow-y-scroll scrollbar h-full my-3'>
         {/* <SingleMsg className='text-white' content={'test msg'} email={'unsetEmail'}/>
           <SingleMsg className='text-white' content={'test msg'} email={'unsetEmail'}/> */}
-        {queryPrivateMsg.isLoading && "msg loading..."}
+        {queryPrivateMsg.isLoading && <div className='h-20 text-white'>msg loading...</div>}
         {currMsgList.map((m, idx) => {
           if (idx == 0) {
             return <SingleMsg msgRef={lastPrivateMsgNodeRef} className='text-white'
@@ -233,7 +232,6 @@ function renderMsg(newMsg, setCurrMsgList, needScroll) {
       return [...currMsgList, newMsg]
     })
   }
-  console.log("needScroll:", needScroll)
   if (needScroll) {
     scrollToEnd()
   }
@@ -243,7 +241,8 @@ function scrollToEnd() {
   // wait for next tick
   setTimeout(() => {
     const msgScrollElement = document.getElementById('msgScroll')
-    msgScrollElement?.scrollTo(0, msgScrollElement?.scrollHeight)
+    console.log("scroll bottom:", msgScrollElement.scrollHeight)
+    msgScrollElement.scrollTo(0, msgScrollElement.scrollHeight)
   }, 0)
 }
 
@@ -251,6 +250,7 @@ function scrollToHeight(node) {
   // wait for next tick
   setTimeout(() => {
     const msgScrollElement = document.getElementById('msgScroll')
+    console.log("scroll height:", node.scrollHeight)
     msgScrollElement?.scrollTo(0, node.scrollHeight)
   }, 0)
 }
