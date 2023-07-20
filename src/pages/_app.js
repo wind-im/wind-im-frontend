@@ -3,10 +3,16 @@ import { QueryClientProvider, QueryClient } from 'react-query'
 import { useEffect } from 'react'
 import { onlineHeartbeat } from '@/utils/apiUtils'
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false, // default: true
+    },
+  },
+})
 
 // Next.js custom app entry, this function runs before every pages's initialization.
-export default function WindIM ({ Component, pageProps }) {
+export default function WindIM({ Component, pageProps }) {
   // reference: per-page layouts(https://nextjs.org/docs/basic-features/layouts)
   const getLayout = Component.getLayout || ((page) => page)
 
@@ -20,7 +26,7 @@ export default function WindIM ({ Component, pageProps }) {
   )
 }
 
-function useOnlineHeartbeat (second) {
+function useOnlineHeartbeat(second) {
   useEffect(() => {
     onlineHeartbeat()
     const interval = setInterval(() => {

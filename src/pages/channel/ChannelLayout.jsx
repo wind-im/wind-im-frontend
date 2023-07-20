@@ -113,6 +113,7 @@ function ChannelInfoPanel({ channelId }) {
         }
     }
 
+    // click elsewhere, close the window
     useEffect(() => {
         const closeMenuEvent = document.addEventListener('mousedown', closeOpenMenus)
         return () => {
