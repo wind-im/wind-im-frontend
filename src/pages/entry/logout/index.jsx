@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router'
-import { useMutation } from 'react-query'
+import { useMutation, useQuery } from 'react-query'
 import axios from '@/utils/axiosUtils'
 import Layout from '@/pages/Layout'
 

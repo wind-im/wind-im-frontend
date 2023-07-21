@@ -126,3 +126,14 @@ export async function getInviteUrl (channelId) {
   const result = await axios.get('/api/channelInviteUrl', { params })
   return result.data
 }
+
+
+export async function getPrivateMsgByOffset (msgId, offset) {
+  if (msgId == null || offset == null) {
+    return {} 
+  }
+  const params = new URLSearchParams([['id', msgId], ['offset', offset]])
+  const result = await axios.get('/api/privateMsgByOffset', {params})
+
+  return result.data
+}

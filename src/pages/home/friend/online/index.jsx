@@ -15,7 +15,7 @@ Online.getLayout = function getLayout (page) {
   )
 }
 
-export default function Online ({ sideBarActiveState }) {
+export default function Online () {
   const [openAddFriendWindow, setOpenAddFriendWindow] = useState(false)
   const { isLoading, error, data } = useQuery('getAllFriends', getOnlineFriendList)
 
@@ -37,7 +37,7 @@ export default function Online ({ sideBarActiveState }) {
         }
         {data && data.data?.map((item, idx) => {
           const usernameAndTag = `${item.friendRel?.username}#${item.friendRel?.tag}`
-          return <FriendCard key={idx} usernameAndTag={usernameAndTag} online={item.friendRel.online} sideBarActiveState={sideBarActiveState}/>
+          return <FriendCard key={idx} usernameAndTag={usernameAndTag} online={item.friendRel.online}/>
         })}
       </div>
     </div>
